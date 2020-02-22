@@ -1,4 +1,4 @@
-import 'package:TodoList/utils/data_util.dart';
+import 'package:ToDoIt/utils/data_util.dart';
 import 'package:flutter/material.dart';
 import './widgets/todo_items_list.dart';
 

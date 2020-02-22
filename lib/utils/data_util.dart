@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:TodoList/models/todo_item_model.dart';
+import '../models/todo_item_model.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DataUtil {

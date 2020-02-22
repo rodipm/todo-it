@@ -1,4 +1,4 @@
-import 'package:TodoList/utils/data_util.dart';
+import 'package:ToDoIt/utils/data_util.dart';
 import 'package:flutter/material.dart';
 import './todo_item.dart';
 import '../models/todo_item_model.dart';
@@ -11,6 +11,7 @@ class TodoItemsList extends StatefulWidget {
 }
 
 class _TodoItemsListState extends State<TodoItemsList> {
+  bool _loadingList;
   TextEditingController _nameTextController = TextEditingController();
   TextEditingController _descTextController = TextEditingController();
   String _currentlySelectedMode = "All";
@@ -23,9 +24,11 @@ class _TodoItemsListState extends State<TodoItemsList> {
   @override
   void initState() {
     super.initState();
+    _loadingList = true;
     widget.storage.readTodoListItems().then((value) {
       setState(() {
         todoItems = value;
+        _loadingList = false;
         _filterItems();
       });
     });
@@ -227,22 +230,47 @@ class _TodoItemsListState extends State<TodoItemsList> {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: filteredItems.length,
-        itemBuilder: (context, index) {
-          final currentItem = filteredItems[index];
-          final itemIndex = filteredItemsIndexes[index];
-          return TodoItem(
-            editItemHandler: () =>
-                this._displayEditItemDialog(itemIndex, context),
-            removeItemHandler: () => this._removeItem(itemIndex),
-            selectHandler: () => this._toggleSelected(itemIndex),
-            toggleCompleteHandler: () => this._toggleCompleted(itemIndex),
-            toggleStarreHandler: () => this._toggleStarred(itemIndex),
-            todoItem: currentItem,
-          );
-        },
-      ),
+      body: this._loadingList
+          ? Container(
+              height: double.infinity,
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(50),
+                    child: Text(
+                      "Loading Todo List...",
+                      style: TextStyle(
+                        fontSize: 25,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  CircularProgressIndicator(
+                    backgroundColor: Colors.deepOrange,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: filteredItems.length,
+              itemBuilder: (context, index) {
+                final currentItem = filteredItems[index];
+                final itemIndex = filteredItemsIndexes[index];
+                return TodoItem(
+                  editItemHandler: () =>
+                      this._displayEditItemDialog(itemIndex, context),
+                  removeItemHandler: () => this._removeItem(itemIndex),
+                  selectHandler: () => this._toggleSelected(itemIndex),
+                  toggleCompleteHandler: () => this._toggleCompleted(itemIndex),
+                  toggleStarreHandler: () => this._toggleStarred(itemIndex),
+                  todoItem: currentItem,
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
           onPressed: () => _displayAddItemDialogName(context),
           backgroundColor: Colors.deepOrange,
