@@ -1,49 +1,58 @@
+import 'package:TodoList/utils/data_util.dart';
 import 'package:flutter/material.dart';
 import './todo_item.dart';
 import '../models/todo_item_model.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+class TodoItemsList extends StatefulWidget {
+  final DataUtil storage;
+  TodoItemsList({Key key, this.storage}) : super(key: key);
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _TodoItemsListState createState() => _TodoItemsListState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _TodoItemsListState extends State<TodoItemsList> {
   TextEditingController _nameTextController = TextEditingController();
   TextEditingController _descTextController = TextEditingController();
   String _currentlySelectedMode = "All";
 
-  List<TodoItemModel> filteredItems;
-  List<int> filteredItemsIndexes;
+  List<TodoItemModel> filteredItems = [];
+  List<int> filteredItemsIndexes = [];
 
-  List<TodoItemModel> todoItems = [
-    TodoItemModel(
-      title: "First Item",
-      completed: false,
-      selected: false,
-      description: "Some Description",
-      starred: false
-    ),
-    TodoItemModel(
-      title: "Second Item - A longer Title",
-      completed: true,
-      selected: false,
-      description: "Another Description, this time a little bit longer.",
-      starred: true
-    ),
-  ];
+  List<TodoItemModel> todoItems;
 
   @override
   void initState() {
     super.initState();
-    _filterItems();
+    widget.storage.readTodoListItems().then((value) {
+      setState(() {
+        todoItems = value;
+        _filterItems();
+      });
+    });
   }
 
-  void _removeItemFromList(int itemId) {
+  void _addItem(String _title, String _description) {
+    if (_title.length > 0) {
+      setState(() {
+        todoItems = List.from(todoItems)
+          ..add(TodoItemModel(
+              title: _title,
+              completed: false,
+              description: _description,
+              selected: false,
+              starred: false));
+        _filterItems();
+      });
+      widget.storage.writeTodoListItems(todoItems);
+    }
+  }
+
+  void _removeItem(int itemId) {
     setState(() {
       todoItems = List.from(todoItems)..removeAt(itemId);
       _filterItems();
     });
+    widget.storage.writeTodoListItems(todoItems);
   }
 
   void _toggleCompleted(int itemId) {
@@ -51,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       todoItems[itemId].completed = !todoItems[itemId].completed;
       _filterItems();
     });
+    widget.storage.writeTodoListItems(todoItems);
   }
 
   void _toggleStarred(int itemId) {
@@ -58,13 +68,15 @@ class _MyHomePageState extends State<MyHomePage> {
       todoItems[itemId].starred = !todoItems[itemId].starred;
       _filterItems();
     });
+    widget.storage.writeTodoListItems(todoItems);
   }
 
-  void selectItem(int itemId) {
+  void _toggleSelected(int itemId) {
     setState(() {
       todoItems[itemId].selected = !todoItems[itemId].selected;
       _filterItems();
     });
+    widget.storage.writeTodoListItems(todoItems);
   }
 
   void _editItem(int itemId, String _title, String _description) {
@@ -74,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         todoItems[itemId].description = _description;
         _filterItems();
       });
+      widget.storage.writeTodoListItems(todoItems);
     }
   }
 
@@ -92,22 +105,6 @@ class _MyHomePageState extends State<MyHomePage> {
         filteredItemsIndexes.add(i);
       }
     });
-  }
-
-  void _addItem(String _title, String _description) {
-    if (_title.length > 0) {
-      setState(() {
-        todoItems = List.from(todoItems)
-          ..add(TodoItemModel(
-            title: _title,
-            completed: false,
-            description: _description,
-            selected: false,
-            starred: false
-          ));
-        _filterItems();
-      });
-    }
   }
 
   void _displayAddItemDialogName(BuildContext context) async {
@@ -236,9 +233,10 @@ class _MyHomePageState extends State<MyHomePage> {
           final currentItem = filteredItems[index];
           final itemIndex = filteredItemsIndexes[index];
           return TodoItem(
-            editItemHandler: () => this._displayEditItemDialog(itemIndex, context),
-            removeItemHandler: () => this._removeItemFromList(itemIndex),
-            selectHandler: () => this.selectItem(itemIndex),
+            editItemHandler: () =>
+                this._displayEditItemDialog(itemIndex, context),
+            removeItemHandler: () => this._removeItem(itemIndex),
+            selectHandler: () => this._toggleSelected(itemIndex),
             toggleCompleteHandler: () => this._toggleCompleted(itemIndex),
             toggleStarreHandler: () => this._toggleStarred(itemIndex),
             todoItem: currentItem,

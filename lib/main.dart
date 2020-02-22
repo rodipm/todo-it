@@ -1,5 +1,6 @@
+import 'package:TodoList/utils/data_util.dart';
 import 'package:flutter/material.dart';
-import './widgets/home_page.dart';
+import './widgets/todo_items_list.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,7 +11,7 @@ class MyApp extends StatelessWidget {
       title: 'ToDo-it',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: MyHomePage(),
+      home: TodoItemsList(storage: DataUtil()),
     );
   }
 }
