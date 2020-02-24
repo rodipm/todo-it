@@ -1,6 +1,7 @@
-import 'package:ToDoIt/utils/data_util.dart';
+import 'package:ToDoIt/widgets/GroupsList/groups_list.dart';
 import 'package:flutter/material.dart';
-import './widgets/todo_items_list.dart';
+import './widgets/TodoItemsList/todo_items_list.dart';
+import './utils/data_util.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +12,12 @@ class MyApp extends StatelessWidget {
       title: 'ToDo-it',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: TodoItemsList(storage: DataUtil()),
+      // home: TodoItemsList(storage: DataUtil()),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => GroupsList(storage: DataUtil()),
+        '/TodoItemsList': (context) => TodoItemsList(storage: DataUtil()),
+      },
     );
   }
 }

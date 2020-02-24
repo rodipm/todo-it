@@ -1,0 +1,4 @@
+{
+    'groupTitle': [TodoListItem(), ...],
+    ...
+}

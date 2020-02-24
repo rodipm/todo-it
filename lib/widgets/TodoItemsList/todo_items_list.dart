@@ -1,11 +1,12 @@
 import 'package:ToDoIt/utils/data_util.dart';
 import 'package:flutter/material.dart';
 import './todo_item.dart';
-import '../models/todo_item_model.dart';
+import '../../models/todo_item_model.dart';
 
 class TodoItemsList extends StatefulWidget {
   final DataUtil storage;
-  TodoItemsList({Key key, this.storage}) : super(key: key);
+  final String groupId;
+  TodoItemsList({Key key, this.storage, this.groupId}) : super(key: key);
   @override
   _TodoItemsListState createState() => _TodoItemsListState();
 }
@@ -25,7 +26,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
   void initState() {
     super.initState();
     _loadingList = true;
-    widget.storage.readTodoListItems().then((value) {
+    widget.storage.readTodoListItemsFromGroup(widget.groupId).then((value) {
       setState(() {
         todoItems = value;
         _loadingList = false;
@@ -40,13 +41,13 @@ class _TodoItemsListState extends State<TodoItemsList> {
         todoItems = List.from(todoItems)
           ..add(TodoItemModel(
               title: _title,
-              completed: false,
+              done: false,
               description: _description,
               selected: false,
               starred: false));
         _filterItems();
       });
-      widget.storage.writeTodoListItems(todoItems);
+      widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
     }
   }
 
@@ -55,15 +56,15 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems = List.from(todoItems)..removeAt(itemId);
       _filterItems();
     });
-    widget.storage.writeTodoListItems(todoItems);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
   }
 
-  void _toggleCompleted(int itemId) {
+  void _toggledone(int itemId) {
     setState(() {
-      todoItems[itemId].completed = !todoItems[itemId].completed;
+      todoItems[itemId].done = !todoItems[itemId].done;
       _filterItems();
     });
-    widget.storage.writeTodoListItems(todoItems);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
   }
 
   void _toggleStarred(int itemId) {
@@ -71,7 +72,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems[itemId].starred = !todoItems[itemId].starred;
       _filterItems();
     });
-    widget.storage.writeTodoListItems(todoItems);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
   }
 
   void _toggleSelected(int itemId) {
@@ -79,7 +80,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems[itemId].selected = !todoItems[itemId].selected;
       _filterItems();
     });
-    widget.storage.writeTodoListItems(todoItems);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
   }
 
   void _editItem(int itemId, String _title, String _description) {
@@ -89,7 +90,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
         todoItems[itemId].description = _description;
         _filterItems();
       });
-      widget.storage.writeTodoListItems(todoItems);
+      widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupId);
     }
   }
 
@@ -98,9 +99,9 @@ class _TodoItemsListState extends State<TodoItemsList> {
       filteredItems = [];
       filteredItemsIndexes = [];
       for (int i = 0; i < todoItems.length; i++) {
-        if (_currentlySelectedMode == "Done" && !todoItems[i].completed)
+        if (_currentlySelectedMode == "Done" && !todoItems[i].done)
           continue;
-        else if (_currentlySelectedMode == "Todo" && todoItems[i].completed)
+        else if (_currentlySelectedMode == "Todo" && todoItems[i].done)
           continue;
         else if (_currentlySelectedMode == "Starred" && !todoItems[i].starred)
           continue;
@@ -110,7 +111,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
     });
   }
 
-  void _displayAddItemDialogName(BuildContext context) async {
+  void _displayAddItemDialog(BuildContext context) async {
     return showDialog(
       context: context,
       builder: (context) {
@@ -265,16 +266,17 @@ class _TodoItemsListState extends State<TodoItemsList> {
                       this._displayEditItemDialog(itemIndex, context),
                   removeItemHandler: () => this._removeItem(itemIndex),
                   selectHandler: () => this._toggleSelected(itemIndex),
-                  toggleCompleteHandler: () => this._toggleCompleted(itemIndex),
+                  toggleCompleteHandler: () => this._toggledone(itemIndex),
                   toggleStarreHandler: () => this._toggleStarred(itemIndex),
                   todoItem: currentItem,
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () => _displayAddItemDialogName(context),
-          backgroundColor: Colors.deepOrange,
-          child: Icon(Icons.add)),
+        onPressed: () => _displayAddItemDialog(context),
+        backgroundColor: Colors.deepOrange,
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

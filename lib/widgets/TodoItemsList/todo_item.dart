@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/todo_item_model.dart';
+import '../../models/todo_item_model.dart';
 
 class TodoItem extends StatelessWidget {
   final TodoItemModel todoItem;
@@ -17,7 +17,7 @@ class TodoItem extends StatelessWidget {
       this.editItemHandler,
       this.todoItem});
 
-  buildView(_isCompleted, _isSelected, _isStarred, BuildContext context) {
+  buildView(_isdone, _isSelected, _isStarred, BuildContext context) {
     List<Widget> _finalView = [];
 
     _finalView.add(
@@ -61,7 +61,7 @@ class TodoItem extends StatelessWidget {
                   IconButton(
                     onPressed: this.toggleCompleteHandler,
                     icon: Icon(Icons.done,
-                        color: _isCompleted ? Colors.deepOrange : Colors.grey),
+                        color: _isdone ? Colors.deepOrange : Colors.grey),
                   ),
                   IconButton(
                     onPressed: this.removeItemHandler,
@@ -149,7 +149,7 @@ class TodoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool _isCompleted = this.todoItem.completed;
+    bool _isdone = this.todoItem.done;
     bool _isSelected = this.todoItem.selected;
     bool _isStarred = this.todoItem.starred;
 
@@ -160,7 +160,7 @@ class TodoItem extends StatelessWidget {
         margin: EdgeInsets.all(10.0),
         child: Column(
           children:
-              this.buildView(_isCompleted, _isSelected, _isStarred, context),
+              this.buildView(_isdone, _isSelected, _isStarred, context),
         ),
       ),
     );
