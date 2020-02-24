@@ -14,7 +14,7 @@ class DataUtil {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/ToDoIt_dsadsaddsadsasad.json');
+    return File('$path/ToDoIt_Data.json');
   }
 
   Future<File> writeGroup(String title) async {
@@ -53,30 +53,76 @@ class DataUtil {
     }
   }
 
+  Future<bool> editGroup(String _oldTitle, String _newTitle) async {
+    try {
+      print("Editing group $_oldTitle");
+      final file = await _localFile;
+      String contents = await file.readAsString();
+      print("Contents:");
+      print(inspect(contents));
+      Map<String, dynamic> jsonContents = jsonDecode(contents);
+      print("jsonContents:");
+      print(inspect(jsonContents));
+      
+      List<Object> todoItems = jsonContents[_oldTitle];
+      print("Old Values:");
+      print(inspect(todoItems));
+
+      jsonContents.remove(_oldTitle);
+      print("Removed:");
+      print(inspect(jsonContents));
+
+      jsonContents.addAll({"$_newTitle": todoItems});
+
+      file.writeAsString(jsonEncode(jsonContents));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
   Future<File> writeTodoListItemsToGroup(
       List<TodoItemModel> todoList, String groupTitle) async {
+      
+    print("Writing todo list items to group");
     final file = await _localFile;
-    var todoListItems = {groupTitle: []};
+    String contents = await file.readAsString();
+    Map<String, Object> jsonContents = jsonDecode(contents);
+
+    print("jsonContents");
+    print(inspect(jsonContents));
+    List<Object> newTodoItemList = [];
 
     for (TodoItemModel item in todoList)
-      todoListItems[groupTitle].add(item.toJson());
+       newTodoItemList.add(item.toJson());
 
-    return file.writeAsString(jsonEncode(todoListItems));
+    jsonContents.update(groupTitle, (value) => newTodoItemList);
+
+    print("Update jsocn Contents");
+    print(inspect(jsonContents));
+
+    return file.writeAsString(jsonEncode(jsonContents));
   }
 
   Future<List<TodoItemModel>> readTodoListItemsFromGroup(
       String groupTitle) async {
     try {
+      print("Reading Todo List Items from Group $groupTitle");
       final file = await _localFile;
       String contents = await file.readAsString();
+      print("contents:");
+      print(inspect(contents));
       List<TodoItemModel> todoListItems = [];
       for (var itemJson in jsonDecode(contents)[groupTitle])
         todoListItems.add(TodoItemModel.fromJson(itemJson));
+      print("Todo List Items");
+      print(inspect(todoListItems));
       return todoListItems;
     } catch (e) {
+      print("Error while reading todo list items from group");
+      print(inspect(e));
       return [];
     }
-  }
+}	
 
   Future<Map<String, int>> readGroupTodoItemsStats(String groupTitle) async {
     try {
@@ -87,16 +133,22 @@ class DataUtil {
         "done": 0,
         "todo": 0,
       };
-      for (var itemJson in jsonDecode(contents)[groupTitle]) {
-        if (itemJson.starred)
+      Map<String, dynamic> jsonContents = jsonDecode(contents);
+      print("Json Contents");
+      print(inspect(jsonContents));
+      var todoItems = jsonContents[groupTitle];
+      for (var itemJson in todoItems) {
+        if (itemJson['starred'])
           groupItemsStats["starred"]++;
-        else if (itemJson.done)
+        if (itemJson['done'])
           groupItemsStats["done"]++;
-        else
+        if (!itemJson['done'])
           groupItemsStats["todo"]++;
       }
       return groupItemsStats;
     } catch (e) {
+      print("Error while getting TodoItemsStats");
+      print(inspect(e));
       return {
         "starred": 0,
         "done": 0,

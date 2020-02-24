@@ -2,6 +2,7 @@ import 'package:ToDoIt/models/group_item_model.dart';
 import 'package:ToDoIt/utils/data_util.dart';
 import 'package:ToDoIt/widgets/GroupsList/group_item.dart';
 import 'package:flutter/material.dart';
+import '../TodoItemsList/todo_items_list.dart';
 
 class GroupsList extends StatefulWidget {
   final DataUtil storage;
@@ -17,6 +18,16 @@ class _GroupsListState extends State<GroupsList> {
 
   List<GroupItemModel> groupItems = [];
 
+  @override
+  void initState() {
+    super.initState();
+    widget.storage.readGroupItems().then((_groupItems) {
+      setState(() {
+        groupItems = _groupItems;
+      });
+    });
+  }
+
   void _addGroup(String _title) {
     List<String> _groupTitles = groupItems.map((e) => e.title).toList();
 
@@ -28,34 +39,42 @@ class _GroupsListState extends State<GroupsList> {
     }
   }
 
-  void _removeGroup(int groupId) {
-    String _groupTitle = groupItems[groupId].title;
+  void _removeGroup(int groupTitle) {
+    String _groupTitle = groupItems[groupTitle].title;
     setState(() {
-      groupItems = List.from(groupItems)..removeAt(groupId);
+      groupItems = List.from(groupItems)..removeAt(groupTitle);
     });
     widget.storage.removeGroup(_groupTitle);
   }
 
-  void _editGroup(int groupId, String _title) async{
+  void _editGroup(int groupTitle, String _title) async {
     List<String> _groupTitles = groupItems.map((e) => e.title).toList();
-    String _oldTitle = groupItems[groupId].title;
+    String _oldTitle = groupItems[groupTitle].title;
     if (_title.length > 0 && !_groupTitles.contains(_title)) {
       setState(() {
-        groupItems[groupId].title = _title;
+        groupItems[groupTitle].title = _title;
       });
-      await widget.storage.removeGroup(_oldTitle);
-      await widget.storage.writeGroup(_title);
+      await widget.storage.editGroup(_oldTitle, _title);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    widget.storage.readGroupItems().then((_groupItems) {
-      setState(() {
-        groupItems = _groupItems;
-      });
-    });
+  void _selectGroup(String _groupTitlem, BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TodoItemsList(
+          storage: DataUtil(),
+          groupTitle: _groupTitlem,
+        ),
+      ),
+    ).then(
+      (value) => widget.storage.readGroupItems().then((_groupItems) {
+        print("Returning...");
+        setState(() {
+          groupItems = _groupItems;
+        });
+      }),
+    );
   }
 
   void _displayEditItemDialog(int itemId, BuildContext context) async {
@@ -147,6 +166,8 @@ class _GroupsListState extends State<GroupsList> {
             groupItem: groupItems[index],
             editGroupHandler: () => this._displayEditItemDialog(index, context),
             removeGroupHandler: () => this._removeGroup(index),
+            selectGroupHandler: () =>
+                this._selectGroup(groupItems[index].title, context),
           );
         },
       ),

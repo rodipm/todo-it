@@ -12,12 +12,7 @@ class MyApp extends StatelessWidget {
       title: 'ToDo-it',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      // home: TodoItemsList(storage: DataUtil()),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => GroupsList(storage: DataUtil()),
-        '/TodoItemsList': (context) => TodoItemsList(storage: DataUtil()),
-      },
+      home: GroupsList(storage: DataUtil()),
     );
   }
 }

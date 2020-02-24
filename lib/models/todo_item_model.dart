@@ -6,7 +6,7 @@ class TodoItemModel {
   bool done;
   bool selected;
   bool starred;
-  int groupId;
+  int groupTitle;
 
   TodoItemModel(
       {this.title,
