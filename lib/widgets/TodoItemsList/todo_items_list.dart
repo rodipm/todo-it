@@ -6,7 +6,9 @@ import '../../models/todo_item_model.dart';
 class TodoItemsList extends StatefulWidget {
   final DataUtil storage;
   final String groupTitle;
+
   TodoItemsList({Key key, this.storage, this.groupTitle}) : super(key: key);
+
   @override
   _TodoItemsListState createState() => _TodoItemsListState();
 }
@@ -26,7 +28,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
   void initState() {
     super.initState();
     _loadingList = true;
-    DataUtil().readTodoListItemsFromGroup(widget.groupTitle).then((value) {
+    widget.storage.readTodoListItemsFromGroup(widget.groupTitle).then((value) {
       setState(() {
         todoItems = value;
         _loadingList = false;
@@ -47,7 +49,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
               starred: false));
         _filterItems();
       });
-      DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+      widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
     }
   }
 
@@ -56,7 +58,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems = List.from(todoItems)..removeAt(itemId);
       _filterItems();
     });
-    DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
   }
 
   void _toggledone(int itemId) {
@@ -64,7 +66,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems[itemId].done = !todoItems[itemId].done;
       _filterItems();
     });
-    DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
   }
 
   void _toggleStarred(int itemId) {
@@ -72,7 +74,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems[itemId].starred = !todoItems[itemId].starred;
       _filterItems();
     });
-    DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
   }
 
   void _toggleSelected(int itemId) {
@@ -80,7 +82,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
       todoItems[itemId].selected = !todoItems[itemId].selected;
       _filterItems();
     });
-    DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+    widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
   }
 
   void _editItem(int itemId, String _title, String _description) {
@@ -90,7 +92,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
         todoItems[itemId].description = _description;
         _filterItems();
       });
-      DataUtil().writeTodoListItemsToGroup(todoItems, widget.groupTitle);
+      widget.storage.writeTodoListItemsToGroup(todoItems, widget.groupTitle);
     }
   }
 
@@ -269,6 +271,7 @@ class _TodoItemsListState extends State<TodoItemsList> {
                   toggleCompleteHandler: () => this._toggledone(itemIndex),
                   toggleStarreHandler: () => this._toggleStarred(itemIndex),
                   todoItem: currentItem,
+                  
                 );
               },
             ),

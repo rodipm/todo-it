@@ -21,6 +21,10 @@ class _GroupsListState extends State<GroupsList> {
   @override
   void initState() {
     super.initState();
+    _updateGroups();
+  }
+
+  void _updateGroups() {
     widget.storage.readGroupItems().then((_groupItems) {
       setState(() {
         groupItems = _groupItems;
@@ -68,12 +72,7 @@ class _GroupsListState extends State<GroupsList> {
         ),
       ),
     ).then(
-      (value) => widget.storage.readGroupItems().then((_groupItems) {
-        print("Returning...");
-        setState(() {
-          groupItems = _groupItems;
-        });
-      }),
+      (value) => this._updateGroups(),
     );
   }
 

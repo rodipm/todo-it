@@ -1,6 +1,5 @@
 import 'package:ToDoIt/widgets/GroupsList/groups_list.dart';
 import 'package:flutter/material.dart';
-import './widgets/TodoItemsList/todo_items_list.dart';
 import './utils/data_util.dart';
 
 void main() => runApp(MyApp());
